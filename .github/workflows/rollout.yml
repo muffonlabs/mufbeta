@@ -1,0 +1,106 @@
+# This is a basic workflow to help you get started with Actions
+
+name: rollout
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+          - ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set up checkout
+        uses: actions/checkout@v4
+        with:
+          repository: staniel359/muffon
+      - uses: pnpm/action-setup@v3
+        with:
+          version: latest
+
+      - name: Fix pnpm bug # https://github.com/electron-userland/electron-builder/issues/6933#issuecomment-1213438889
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Get the version of pnpm
+          $pnpmVersion = pnpm -v
+          
+          # Construct the file path with the pnpm version
+          $file = "C:\Users\runneradmin\setup-pnpm\node_modules\.pnpm\pnpm@$pnpmVersion\node_modules\pnpm\bin\pnpm.cjs"
+
+          # Read the content of the file
+          $content = Get-Content $file
+
+          # Replace the target string
+          $content = $content -replace "#!/usr/bin/env node", "#!node"
+
+          # Write the modified content back to the file
+          $content | Set-Content $file
+
+          Write-Host "Replacement complete."
+
+      - name: Set up Electron cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/electron
+          key: ${{ runner.os }}-electron-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-electron-cache-
+
+      - name: Set up Electron Builder cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/electron-builder
+          key: ${{ runner.os }}-electron-builder-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-electron-builder-cache-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Set up dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Create .env file
+        run: |
+          touch .env
+          echo VITE_APP_ELECTRON_STORE_KEY=${{ secrets.ELECTRON_STORE_KEY }} >> .env
+          echo VITE_APP_SHARE_ENCRYPTION_KEY=${{ secrets.SHARE_ENCRYPTION_KEY }} >> .env
+          echo VITE_APP_ANONYMOUS_TOKEN=${{ secrets.ANONYMOUS_TOKEN }} >> .env
+          echo VITE_APP_DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }} >> .env
+          cat .env
+
+      - name: Install packages (Linux-only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install flatpak flatpak-builder libarchive-tools rpm -y
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Release
+        env:
+          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: pnpm release
+
+      - name: Release macos x64 # We do it separately without defining in electron-builder.json to prevent the distribution.xml not found error
+        if: matrix.os == 'macos-latest'
+        env:
+          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: pnpm release --x64
+        
