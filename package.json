@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "patch": "node patch.js",
+    "patch-source": "node patch.js",
     "patch-package": "node patch-package.js"
   },
   "author": "muffonlabs",

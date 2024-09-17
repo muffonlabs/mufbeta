@@ -77,7 +77,7 @@ jobs:
           cache: pnpm
 
       - name: patch muffon source
-        run: pnpm patch
+        run: pnpm patch-source
 
       - name: patch muffon's package.json
         run: pnpm patch-package -v ${{ inputs.version }}
