@@ -1,0 +1,13 @@
+{
+  "name": "mufbeta",
+  "version": "0.1.0",
+  "description": "Beta rollouts for muffon",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "patch": "node patch.js",
+    "patch-package": "node patch-package.js"
+  },
+  "author": "muffonlabs",
+  "license": "MIT"
+}

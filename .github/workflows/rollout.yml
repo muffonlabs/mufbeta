@@ -1,13 +1,16 @@
-# This is a basic workflow to help you get started with Actions
-
 name: rollout
 
-# Controls when the workflow will run
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      version: 
+        required: true
+        description: input version number
+        type: string
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+env:
+  muffon_repo_url: https://github.com/staniel359/muffon
+
 jobs:
   build:
     strategy:
@@ -20,10 +23,15 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: start the rollout
+        run: echo "Rolling out v$VERSION"
+
       - name: Set up checkout
         uses: actions/checkout@v4
-        with:
-          repository: staniel359/muffon
+
+      - name: clone muffon
+        run: git clone $muffon_repo_url
+
       - uses: pnpm/action-setup@v3
         with:
           version: latest
@@ -68,6 +76,15 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: patch muffon source
+        run: pnpm patch
+
+      - name: patch muffon's package.json
+        run: pnpm patch-package -v ${{ inputs.version }}
+
+      - name: cd to muffon
+        run: cd muffon
+
       - name: Set up dependencies
         run: pnpm install
 
@@ -93,7 +110,7 @@ jobs:
         env:
           ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
           ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: pnpm release
 
       - name: Release macos x64 # We do it separately without defining in electron-builder.json to prevent the distribution.xml not found error
@@ -101,6 +118,6 @@ jobs:
         env:
           ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
           ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: pnpm release --x64
         
