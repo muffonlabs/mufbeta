@@ -86,7 +86,7 @@ jobs:
         run: pnpm -C muffon install
 
       - name: Lint
-        run: pnpm -C muffon exec lint
+        run: pnpm -C muffon lint
 
       - name: Create .env file
         run: |
@@ -108,7 +108,7 @@ jobs:
           ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
           ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
           GH_TOKEN: ${{ github.token }}
-        run: pnpm -C muffon exec release
+        run: pnpm -C muffon release
 
       - name: Release macos x64 # We do it separately without defining in electron-builder.json to prevent the distribution.xml not found error
         if: matrix.os == 'macos-latest'
@@ -116,5 +116,5 @@ jobs:
           ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
           ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
           GH_TOKEN: ${{ github.token }}
-        run: pnpm -C muffon exec release --x64
+        run: pnpm -C muffon release --x64
         
