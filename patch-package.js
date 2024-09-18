@@ -28,7 +28,7 @@ packageJson.name = 'mufbeta';
 packageJson.version = version;
 packageJson.repository = 'https://github.com/muffonlabs/mufbeta';
 packageJson.author = {
-    email: "staniel359@gmail.com",
+    email: "muffonlabs@gmail.com",
     name: 'muffonlabs',
     url: 'https://github.com/muffonlabs',
 };
