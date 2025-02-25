@@ -45,7 +45,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 'pnpm@10.4.1+sha256.4b702887986995933d4300836b04d6d02a43bc72b52e4f7e93a4ca608b959197'
 
       - name: Set up Electron cache
         uses: actions/cache@v4
