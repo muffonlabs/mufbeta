@@ -31,22 +31,7 @@ jobs:
       - name: clone muffon
         run: git clone https://github.com/staniel359/muffon
 
-      - name: TEMP - DELETE NPMRC (Cross-Platform)
-        run: |
-          if [ -f "muffon/.npmrc" ]; then rm muffon/.npmrc; fi
-        shell: bash
-        if: runner.os != 'Windows'
-      
-      - name: TEMP - DELETE NPMRC (Windows)
-        run: |
-          if (Test-Path "muffon/.npmrc") { Remove-Item -Path "muffon/.npmrc" -Force }
-        shell: pwsh
-        if: runner.os == 'Windows'
-
       - uses: pnpm/action-setup@v4
-
-      - name: TEMP - fix lint
-        run: cd muffon && pnpm i -D @eslint/eslintrc
 
       - name: Set up Electron cache
         uses: actions/cache@v4
