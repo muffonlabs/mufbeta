@@ -45,6 +45,9 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
+      - name: TEMP - fix lint
+        run: cd muffon && pnpm i -D @eslint/eslintrc
+
       - name: Set up Electron cache
         uses: actions/cache@v4
         with:
