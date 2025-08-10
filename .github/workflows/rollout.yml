@@ -31,6 +31,9 @@ jobs:
       - name: clone muffon
         run: git clone https://github.com/staniel359/muffon
 
+      - name: checkout turkish
+        run: git checkout -b turkish
+
       - uses: pnpm/action-setup@v4
 
       - name: Set up Electron cache
