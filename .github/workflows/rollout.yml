@@ -32,7 +32,10 @@ jobs:
         run: git clone https://github.com/staniel359/muffon
 
       - name: checkout turkish
-        run: git switch turkish
+        run: |
+              cd muffon
+              git switch turkish
+              cd ../
 
       - uses: pnpm/action-setup@v4
 
