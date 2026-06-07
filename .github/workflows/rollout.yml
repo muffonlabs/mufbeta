@@ -36,14 +36,14 @@ jobs:
       - name: Set up Electron cache
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/.cache/electron
+          path: /tmp/electron-cache
           key: ${{ runner.os }}-electron-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-electron-cache-
 
       - name: Set up Electron Builder cache
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/.cache/electron-builder
+          path: /tmp/electron-builder-cache
           key: ${{ runner.os }}-electron-builder-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-electron-builder-cache-
 
@@ -85,22 +85,22 @@ jobs:
 
       - name: Release
         env:
-          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+          ELECTRON_CACHE: /tmp/electron-cache
+          ELECTRON_BUILDER_CACHE: /tmp/electron-builder-cache
           GH_TOKEN: ${{ github.token }}
         run: pnpm -C muffon release
 
       - name: Release macos x64 # We do it separately without defining in electron-builder.json to prevent the distribution.xml not found error
         if: matrix.os == 'macos-latest'
         env:
-          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+          ELECTRON_CACHE: /tmp/electron-cache
+          ELECTRON_BUILDER_CACHE: /tmp/electron-builder-cache
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm -C muffon release:electron --x64
       - name: Release linux arm64 # to prevent unnecessary build locally
         if: matrix.os == 'ubuntu-latest'
         env:
-          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+          ELECTRON_CACHE: /tmp/electron-cache
+          ELECTRON_BUILDER_CACHE: /tmp/electron-builder-cache
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm -C muffon release:electron --arm64
